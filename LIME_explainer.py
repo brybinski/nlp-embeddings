@@ -23,7 +23,7 @@ class LIME_explainer(Explainer):
             "LIME requires a predict_proba method to be implemented."
         )
 
-    def explainEmbeddings(self, sentence, word_idx, **kwargs) -> dict:
+    def explainEmbeddings(self, sentence, **kwargs) -> dict:
         raise NotImplementedError(
             "LIME requires a explainEmbeddings method to be implemented."
         )

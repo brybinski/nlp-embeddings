@@ -11,7 +11,7 @@ class Explainer(ABC):
         pass
     
     @abstractmethod
-    def explainEmbeddings(self, sentence, **kwargs) -> list:
+    def explainEmbeddings(self, sentence, **kwargs) -> dict:
             pass
     
     # @abstractmethod

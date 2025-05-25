@@ -20,7 +20,7 @@ class LOFO_explainer(Explainer):
         self.model = model
         self.distance = kwargs.get("distance", euclidean_distance)
 
-    def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> list:
+    def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> dict:
         tokens = self.model.tokenizer.tokenize(sentence)
 
         # Check if the number of embeddings matches the number of tokens
