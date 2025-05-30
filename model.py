@@ -39,3 +39,15 @@ class Model:
 
     def tokenize(self, sentence):
         return self.tokenizer.tokenize(sentence)
+
+
+    def reconstruct_sentence(self, tokens: list) -> str:
+        sentence = ""
+        for token in tokens:
+            if token.startswith("##"):
+                sentence += token[2:] 
+            else:
+                if sentence:
+                    sentence += " "
+                sentence += token
+        return sentence

@@ -10,7 +10,6 @@ from distances import euclidean_distance
 # osadzenia. porównując odległości można ocenić wpływ danego tokena na
 # osadzenie
 
-# TODO: operacja jest szybka, przemyśleć czy nie lepiej zrobić to stochastycznie n razy
 
 
 class LOFO_explainer(Explainer):

@@ -4,25 +4,13 @@ from collections import defaultdict
 import os
 from tqdm import tqdm
 
+# ze 2-3h to przechodziło na 467 tys. słów
 def generate_pos_dictionary(words_file="words.txt", save_pickle=True, pickle_path="pos_dictionary.pkl"):
-    """
-    Generate a dictionary mapping POS tags to lists of words.
-    
-    Args:
-        words_file: Path to file containing English words (one per line)
-        save_pickle: Whether to save the dictionary as a pickle file
-        pickle_path: Path where to save the pickle file
-        
-    Returns:
-        Dictionary with POS tags as keys and lists of words as values
-    """
-    print("Loading spaCy model...")
     model_path = "/home/ryba/Documents/Code/snek/magisterka/en_core_web_trf-3.8.0/en_core_web_trf/en_core_web_trf-3.8.0"
     nlp = spacy.load(model_path)
     nlp.max_length = 1000000
     pos_dict = defaultdict(list)
 
-    print(f"Reading words from {words_file}...")
     with open(words_file, 'r', encoding='utf-8') as f:
         words = [line.strip() for line in f if line.strip()]
     
@@ -33,17 +21,34 @@ def generate_pos_dictionary(words_file="words.txt", save_pickle=True, pickle_pat
     # Create checkpoint directory if it doesn't exist
     checkpoint_dir = "pkl/"
     os.makedirs(checkpoint_dir, exist_ok=True)
+    # Check for existing checkpoints to resume processing
+    checkpoint_files = sorted([f for f in os.listdir(checkpoint_dir) 
+                             if f.startswith("pos_dict_checkpoint_") and f.endswith(".pkl")])
+    if checkpoint_files:
+        latest_checkpoint = os.path.join(checkpoint_dir, checkpoint_files[-1])
+        batch_num = int(checkpoint_files[-1].split("_")[-1].split(".")[0])
+        
+        print(f"Found checkpoint from batch {batch_num}, loading...")
+        with open(latest_checkpoint, 'rb') as f:
+            loaded_dict = pickle.load(f)
+            pos_dict.update(loaded_dict)
+        
+        print(f"Loaded {sum(len(words) for words in loaded_dict.values())} words from checkpoint.")
+    else:
+        print("No checkpoints found, starting from scratch.")
+        batch_num = 0
+
+    start_idx = (batch_num + 1) * batch_size if checkpoint_files else 0
+    remaining_batches = (len(words) - start_idx + batch_size - 1) // batch_size
     
-    for i in tqdm(range(0, len(words[:]), batch_size), total=total_batches):
+    for i in tqdm(range(start_idx, len(words), batch_size), total=remaining_batches):
         batch = words[i:i+batch_size]
         
-        # Process each word individually to get accurate POS tags
         for word in batch:
             doc = nlp(word)
-            pos = doc[0].pos_  # Get the POS tag of the word
+            pos = doc[0].pos_ 
             pos_dict[pos].append(word)
         
-        # Save checkpoint every 20 batches
         batch_num = i // batch_size
         if batch_num > 0 and batch_num % 20 == 0:
             checkpoint_path = os.path.join(checkpoint_dir, f"pos_dict_checkpoint_{batch_num}.pkl")
@@ -51,14 +56,11 @@ def generate_pos_dictionary(words_file="words.txt", save_pickle=True, pickle_pat
             with open(checkpoint_path, 'wb') as f:
                 pickle.dump(dict(pos_dict), f)
     
-    # Convert defaultdict to regular dict
     result_dict = dict(pos_dict)
-    # Print statistics
     print("\nPOS tag distribution:")
     for pos, word_list in result_dict.items():
         print(f"{pos}: {len(word_list)} words")
     
-    # Save as pickle if requested
     if save_pickle:
         print(f"Saving dictionary to {pickle_path}...")
         with open(pickle_path, 'wb') as f:
@@ -68,29 +70,17 @@ def generate_pos_dictionary(words_file="words.txt", save_pickle=True, pickle_pat
     return result_dict
 
 def load_pos_dictionary(pickle_path="pos_dictionary.pkl"):
-    """
-    Load the POS dictionary from a pickle file.
-    
-    Args:
-        pickle_path: Path to the pickle file
-        
-    Returns:
-        Dictionary with POS tags as keys and lists of words as values
-    """
     with open(pickle_path, 'rb') as f:
         return pickle.load(f)
 
 if __name__ == "__main__":
-    # Check if dictionary already exists
     if os.path.exists("pos_dictionary.pkl"):
         print("POS dictionary already exists. Loading from file...")
         pos_dict = load_pos_dictionary()
         print("Dictionary loaded.")
     else:
-        # Generate dictionary
         pos_dict = generate_pos_dictionary()
     
-    # Example usage
     print("\nExample words by POS:")
     for pos, words in pos_dict.items():
-        print(f"{pos}: {words[:5]}...")  # Print first 5 words for each POS
+        print(f"{pos}: {words[:5]}...")
