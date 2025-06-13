@@ -1,5 +1,5 @@
-from explainer import Explainer
-from model import Model
+from explainers.explainer import Explainer
+from models.model import Model
 import torch
 import itertools
 import copy
@@ -9,7 +9,7 @@ from itertools import combinations
 import random
 import sys
 import tqdm
-
+from explainers.explanation import Explanation
 
 class SHAP_explainer(Explainer):
     model: Model
@@ -19,43 +19,63 @@ class SHAP_explainer(Explainer):
         self.distance = kwargs.get("distance", euclidean_distance)
 
     
-    def explainEmbeddings(self, sentence, word_idx=None, max_subsets=None, **kwargs) -> dict:
-        tokens = self.model.tokenizer.tokenize(sentence)
-        
-        dist = {}
+    def explainEmbeddings(self, sentence, word_idx=None, max_subsets=None, **kwargs) -> Explanation:
+        tokens: list = self.model.tokenize(sentence)  # Use consistent tokenize method name
         original_embeddings = self.model.get_embeddings(sentence)
         
+        # Create explanation object
+        explanation = Explanation("SHAP", sentence, tokens)
         
-        # TODO: Zunifikowana klasa wyjaśnienia pod wizualizację?
+        # If word_idx is specified, only explain that specific token
         if word_idx is not None:
-            word = word_idx
-            dist[word] = [tokens[word]]
-            shap_vals = self.shap_values(self.get_score, range(0, len(tokens)), max_perms=max_subsets, target=word_idx, token_list=tokens, distance=self.distance, original_embeddings=original_embeddings)
-            dist[word].append(
-                {
-                    "shapley_values": shap_vals,
-
-                    "explained_token": tokens[word],                
-                }
-            )
-            return dist
-    
-        it = 1
-        for word in range(len(tokens)):
-            print(f"Token \"{tokens[word]}\": {it}/{len(tokens)}")
+            print(f"Explaining token: \"{tokens[word_idx]}\"")
             
-            dist[word] = [tokens[word]]
-            shap_vals = self.shap_values(self.get_score, range(0, len(tokens)), max_subsets=max_subsets, target=word, token_list=tokens, distance=self.distance, original_embeddings=original_embeddings)
-            dist[word].append(
-                {
-                    "shapley_values": shap_vals,
-
-                    "explained_token": tokens[word],                
-                }
+            # Calculate Shapley values for the target token
+            shap_vals = self.shap_values(
+                self.get_score, 
+                range(0, len(tokens)), 
+                max_subsets=max_subsets, 
+                target=word_idx, 
+                token_list=tokens, 
+                distance=self.distance, 
+                original_embeddings=original_embeddings
             )
-            it += 1
             
-        return dist
+            for i, val in enumerate(shap_vals):
+                explanation.add_one_word(
+                    tokens[word_idx],  # Main token
+                    word_idx,          # Main position
+                    tokens[i],         # Sub token
+                    i,                 # Sub position
+                    val                # Shapley value
+                )
+        else:
+            # Explain all tokens
+            for word in range(len(tokens)):
+                print(f"Token \"{tokens[word]}\": {word+1}/{len(tokens)}")
+                
+                # Calculate Shapley values for this token
+                shap_vals = self.shap_values(
+                    self.get_score,
+                    range(0, len(tokens)),
+                    max_subsets=max_subsets, 
+                    target=word, 
+                    token_list=tokens, 
+                    distance=self.distance, 
+                    original_embeddings=original_embeddings
+                )
+                
+                # Add Shapley values to the explanation object
+                for i, val in enumerate(shap_vals):
+                    explanation.add_one_word(
+                        tokens[word],  # Main token
+                        word,          # Main position
+                        tokens[i],     # Sub token
+                        i,             # Sub position
+                        val            # Shapley value
+                    )
+        
+        return explanation
 
     def get_score(self, perm, **kwargs):
         token_list = kwargs.get("token_list")

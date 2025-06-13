@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from typing import Any, Dict, List, Union
-from model import Model
+from models.model import Model
+from explainers.explanation import Explanation
+
 
 class Explainer(ABC):
     model: Model
@@ -11,10 +13,5 @@ class Explainer(ABC):
         pass
     
     @abstractmethod
-    def explainEmbeddings(self, sentence, **kwargs) -> dict:
+    def explainEmbeddings(self, sentence, **kwargs) -> Explanation:
             pass
-    
-    # @abstractmethod
-    # def compare(self, sentence1, sentence2, **kwargs) -> list:
-    #     pass
-    

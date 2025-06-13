@@ -1,7 +1,8 @@
 import pickle
-from explainer import Explainer
-from model import Model
-from distances import cosine_distance, euclidean_distance
+from explainers.explainer import Explainer
+from explainers.explanation import Explanation
+from models.model import Model
+from distances import cosine_distance,euclidean_distance
 import spacy
 import random
 import copy
@@ -18,7 +19,7 @@ class POS_explainer(Explainer):
         self.pos_dict:dict = self.load_pos_dict(path) # dictionary with POS tags as keys and lists of words as values
         self.n = kwargs.get("n", 100)  # number of permutations for each token
         
-    def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> dict:
+    def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> Explanation:
         tokens = self.model.tokenizer.tokenize(sentence)
         
         # Check if the number of embeddings matches the number of tokens
@@ -37,19 +38,23 @@ class POS_explainer(Explainer):
         
         if word_range is None:
             word_range = (0, len(tokens))
-            
-        score = {}
-        for word in range(word_range[0], word_range[1]):
-            score[word] = [tokens[word]]
-            score[word].append(self.get_word_score(
-                tokens[word],
-                word,
-                pos_tags[word],
-                tokens,
-                embeddings))
         
-        return score
+        analyzed_tokens = tokens[word_range[0]:word_range[1]]
+        anazlyzed_sentence = self.model.reconstruct_sentence(analyzed_tokens)
+        explanation = Explanation("POS permutation", anazlyzed_sentence, analyzed_tokens)
 
+        for word in range(word_range[0], word_range[1]):
+            token = tokens[word]
+            
+            # Get word scores
+            word_scores = self.get_word_score(token, word, pos_tags[word], tokens, embeddings)
+            
+            # Add scores to the explanation
+            for sub_pos, score in enumerate(tokens):
+                explanation.add_one_word(token, word, score, sub_pos, word_scores[score])
+        
+        return explanation
+    
     def load_pos_dict(self, pos_dict_path):
         with open(pos_dict_path, "rb") as f:
             self.pos_dict = pickle.load(f)
@@ -85,7 +90,9 @@ class POS_explainer(Explainer):
             scores[token] = 0.0
         
         if pos_tag == 'SUBWORD':
-            # TODO: handle subwords
+            return scores
+        
+        if tokens[position] in ',.;':
             return scores
         
         for n in range(self.n):

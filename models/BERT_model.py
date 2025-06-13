@@ -1,28 +1,21 @@
-#!/opt/anconda/envs/magisterka/bin/python
-
 from transformers import BertTokenizer, BertModel
 import torch
+from models.model import Model
 
-
-class Model:
-    model_name: str
-    model: BertModel
-    tokenizer: BertTokenizer
-    device: torch.device
-
-    def __init__(self, model_name: str):
+class BERT_model(Model):
+    def __init__(self, model_name="bert-base-uncased"):
         self.model_name = model_name
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        self.model = BertModel.from_pretrained("bert-base-uncased")
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        self.model = BertModel.from_pretrained(model_name)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def get_embeddings(self, sentence=None):
-        if sentence is not None:
-            tokenizer = self.tokenizer(sentence, return_tensors="pt")
-            input_ids = tokenizer["input_ids"].to(self.device)
-            attention_mask = tokenizer["attention_mask"].to(self.device)
-        else:
+    def get_embeddings(self, sentence=None) -> list:
+        if sentence is None:
             raise ValueError("Sentence cannot be None")
+            
+        tokenizer = self.tokenizer(sentence, return_tensors="pt")
+        input_ids = tokenizer["input_ids"].to(self.device)
+        attention_mask = tokenizer["attention_mask"].to(self.device)
 
         # Get model output
         self.model.to(self.device)
@@ -37,11 +30,10 @@ class Model:
 
         return embeddings
 
-    def tokenize(self, sentence):
+    def tokenize(self, sentence) -> list:
         return self.tokenizer.tokenize(sentence)
 
-
-    def reconstruct_sentence(self, tokens: list) -> str:
+    def reconstruct_sentence(self, tokens) -> str:
         sentence = ""
         for token in tokens:
             if token.startswith("##"):
