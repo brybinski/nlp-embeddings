@@ -1,7 +1,7 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
-# created-by: conda 24.11.3
+# created-by: conda 25.5.1
 _libgcc_mutex=0.1=conda_forge
 _openmp_mutex=4.5=2_gnu
 aiohappyeyeballs=2.4.4=py312h06a4308_0
@@ -40,9 +40,11 @@ brotli-python=1.1.0=py312h2ec8cdc_2
 bzip2=1.0.8=h4bc722e_7
 c-ares=1.34.5=hb9d3cd8_0
 ca-certificates=2025.4.26=hbd8a1cb_0
+cairo=1.16.0=hb05425b_5
 catalogue=2.0.10=py312h7900ff3_1
-certifi=2025.4.26=py312h06a4308_0
+certifi=2025.7.14=py312h06a4308_0
 cffi=1.17.1=py312h06ac9bb_0
+chardet=4.0.0=py312h06a4308_1003
 charset-normalizer=3.4.2=pyhd8ed1ab_0
 chord=6.0.1=pypi_0
 click=8.1.8=pyh707e725_0
@@ -55,6 +57,7 @@ confection=0.1.5=pyhecae5ae_0
 contourpy=1.2.0=py312hdb19cb5_0
 cpuonly=2.0=0
 cpython=3.12.10=py312hd8ed1ab_0
+cssselect2=0.2.1=pyh9f0ad1d_1
 curated-tokenizers=0.0.9=pypi_0
 curated-transformers=0.1.1=pypi_0
 cycler=0.12.1=pyhd8ed1ab_1
@@ -78,10 +81,13 @@ filelock=3.18.0=pyhd8ed1ab_0
 fontconfig=2.14.2=h14ed4e7_0
 fonttools=4.48.1=py312h98912ed_0
 freetype=2.12.1=h267a509_2
+freetype-py=2.3.0=pyhd8ed1ab_0
 frozenlist=1.5.0=py312h5eee18b_0
 fsspec=2024.12.0=py312h06a4308_0
 gflags=2.2.2=h6a678d5_1
 giflib=5.2.2=hd590300_0
+glib=2.78.4=h6a678d5_0
+glib-tools=2.78.4=h6a678d5_0
 glog=0.7.1=hbabe93e_0
 gmp=6.3.0=hac33072_2
 gmpy2=2.2.1=py312h7201bc8_0
@@ -98,6 +104,7 @@ icalendar=6.3.1=py312h06a4308_0
 icu=73.2=h59595ed_0
 idna=3.10=pyhd8ed1ab_1
 imageio=2.37.0=py312h06a4308_0
+iniconfig=2.1.0=py312h06a4308_0
 intel-openmp=2023.1.0=hdb19cb5_46306
 ipykernel=6.29.5=py312h06a4308_1
 ipython=9.1.0=py312h06a4308_0
@@ -189,11 +196,13 @@ libxcb=1.15=h0b41bf4_0
 libxcrypt=4.4.36=hd590300_1
 libxkbcommon=1.0.1=h097e994_2
 libxml2=2.13.8=hfdd30dd_0
+libxslt=1.1.41=h097e994_0
 libzlib=1.2.13=h4ab18f5_6
 lime=0.2.0.1=py312h06a4308_0
 linkify-it-py=2.0.0=py312h06a4308_0
 llvm-openmp=15.0.7=h0cdce71_0
 llvmlite=0.44.0=py312hc1e8f15_1
+lxml=5.3.0=py312h57af460_1
 lz4-c=1.9.4=h6a678d5_1
 marisa-trie=1.2.1=py312h2ec8cdc_0
 markdown=3.8=py312h06a4308_0
@@ -236,6 +245,7 @@ openjpeg=2.5.2=he7f1fd0_0
 openldap=2.6.4=h42fbc30_0
 openssl=3.5.0=h7b32b05_1
 orc=2.0.1=h2d29ad5_0
+outcome=1.3.0=py312h06a4308_0
 overrides=7.4.0=py312h06a4308_0
 packaging=23.2=py312h06a4308_0
 pandas=2.2.1=py312h526ad5a_0
@@ -248,8 +258,10 @@ pcre2=10.42=hebb0a14_1
 pexpect=4.8.0=pyhd3eb1b0_3
 pillow=10.2.0=py312h5eee18b_0
 pip=25.1.1=pyh8b19718_0
+pixman=0.40.0=h7f8727e_1
 pl-core-news-lg=3.8.0=pypi_0
 platformdirs=4.3.7=py312h06a4308_0
+pluggy=1.5.0=py312h06a4308_0
 preshed=3.0.9=py312h2ec8cdc_2
 prometheus_client=0.21.1=py312h06a4308_0
 prompt-toolkit=3.0.43=py312h06a4308_0
@@ -262,6 +274,7 @@ ptyprocess=0.7.0=pyhd3eb1b0_2
 pure_eval=0.2.2=pyhd3eb1b0_0
 pyarrow=16.1.0=py312h8da182e_1
 pyarrow-core=16.1.0=py312h5429d62_1_cpu
+pycairo=1.23.0=py312h57c37a8_1
 pycparser=2.22=pyh29332c3_1
 pydantic=2.11.4=pyh3cfb1c2_0
 pydantic-core=2.33.2=py312h680f630_0
@@ -270,6 +283,7 @@ pyparsing=3.1.1=pyhd8ed1ab_0
 pyqt=6.7.1=py312h6a678d5_1
 pyqt6-sip=13.9.1=py312h5eee18b_1
 pysocks=1.7.1=pyha55dd90_7
+pytest=8.4.1=py312h06a4308_0
 python=3.12.3=hab00c5b_0_cpython
 python-dateutil=2.8.2=pyhd3eb1b0_0
 python-fastjsonschema=2.20.0=py312h06a4308_0
@@ -296,16 +310,19 @@ re2=2024.02.01=hdb19cb5_0
 readline=8.2=h8c095d6_2
 referencing=0.30.2=py312h06a4308_0
 regex=2024.11.6=py312h5eee18b_0
+reportlab=4.4.1=py312h66e93f0_0
 requests=2.32.3=pyhd8ed1ab_1
 rfc3339-validator=0.1.4=py312h06a4308_0
 rfc3986-validator=0.1.1=py312h06a4308_0
 rich=13.9.4=pyhd8ed1ab_1
+rlpycairo=0.2.0=pyhd8ed1ab_0
 rpds-py=0.22.3=py312h4aa5aa6_0
 s2n=1.4.15=he19d79f_0
 safetensors=0.5.3=py312hc50d6dc_0
 scikit-image=0.25.0=py312h6a678d5_0
 scikit-learn=1.6.1=py312h6a678d5_0
 scipy=1.15.3=py312h525edd1_0
+selenium=4.24.0=py312hb02cf49_0
 send2trash=1.8.2=py312h06a4308_1
 setuptools=80.1.0=pyhff2d567_0
 shap=0.47.2=py312h49ed93b_0
@@ -317,6 +334,7 @@ smart-open=7.1.0=hd8ed1ab_0
 smart_open=7.1.0=pyhd8ed1ab_0
 snappy=1.2.1=h6a678d5_0
 sniffio=1.3.0=py312h06a4308_0
+sortedcontainers=2.4.0=pyhd3eb1b0_0
 soupsieve=2.5=py312h06a4308_0
 spacy=3.8.6=py312hc39e661_0
 spacy-curated-transformers=0.3.0=pypi_0
@@ -325,6 +343,7 @@ spacy-loggers=1.0.5=pyhd8ed1ab_0
 sqlite=3.45.3=h5eee18b_0
 srsly=2.5.1=py312h2ec8cdc_1
 stack_data=0.2.0=pyhd3eb1b0_0
+svglib=1.5.1=pyh72dc6a7_1
 sympy=1.13.1=pypi_0
 tbb=2021.13.0=hceb3a55_1
 terminado=0.17.1=py312h06a4308_0
@@ -340,6 +359,8 @@ tornado=6.4.2=py312h5eee18b_0
 tqdm=4.67.1=py312he106c6f_0
 traitlets=5.14.3=py312h06a4308_0
 transformers=4.49.0=py312h06a4308_0
+trio=0.30.0=py312h06a4308_0
+trio-websocket=0.12.2=py312h06a4308_0
 typer=0.15.4=pyh9571d03_0
 typer-slim=0.15.4=pyhe01879c_0
 typer-slim-standard=0.15.4=haa4fddc_0
@@ -359,6 +380,7 @@ websocket-client=1.8.0=py312h06a4308_0
 wheel=0.45.1=pyhd8ed1ab_1
 widgetsnbextension=4.0.13=py312h06a4308_0
 wrapt=1.17.2=py312h66e93f0_0
+wsproto=1.2.0=py312h06a4308_0
 xcb-util-cursor=0.1.4=h5eee18b_0
 xorg-libxau=1.0.12=hb9d3cd8_0
 xorg-libxdmcp=1.1.5=hb9d3cd8_0

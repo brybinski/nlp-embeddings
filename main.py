@@ -18,11 +18,11 @@ def main():
         spacy="/home/ryba/Documents/Code/snek/magisterka/en_core_web_trf-3.8.0/en_core_web_trf/en_core_web_trf-3.8.0",
         n=100,
     )
-    # loo = LOO_explainer(mod)
-    # shap = SHAP_explainer(mod)
-    # att = BertAttentionExplainer(mod, aggregation_method="sum")
+    loo = LOO_explainer(mod)
+    shap = SHAP_explainer(mod)
+    att = BertAttentionExplainer(mod, aggregation_method="sum")
 
-    docpath = '/home/ryba/Documents/Latex/SEM-DYP-RybinskiBartosz/parts/chapter3/images/'
+    docpath = '/home/ryba/Documents/Latex/SEM-DYP-RybinskiBartosz/parts/chapter4'
     
     # # TODO: TQDM progress bar for every explanation type
     

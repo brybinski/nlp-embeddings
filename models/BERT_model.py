@@ -1,7 +1,7 @@
 from transformers import BertTokenizer, BertModel
 import torch
 from models.model import Model
-
+import numpy as np
 class BERT_model(Model):
     def __init__(self, model_name="bert-base-uncased"):
         self.model_name = model_name
@@ -43,3 +43,46 @@ class BERT_model(Model):
                     sentence += " "
                 sentence += token
         return sentence
+    
+    
+    def tSNE_plot(self, sequences, n_components=2, save_path=None, show=False):
+        """
+        Generates a t-SNE plot for the embeddings of the given sequence.
+        """
+        from sklearn.manifold import TSNE
+        import matplotlib.pyplot as plt
+        
+        plt.figure(figsize=(10, 8))
+
+        all_embeddings = []
+        all_labels = []
+        colors = []
+        
+        for n, sequence in enumerate(sequences):
+            embeddings = self.get_embeddings(sequence)
+            tokens = self.tokenize(sequence)
+            all_embeddings.extend(embeddings)
+            all_labels.extend(tokens)
+            colors.extend([n] * len(embeddings))
+            
+    
+        tsne = TSNE(n_components=n_components, random_state=42, perplexity=7)
+
+        reduced_embeddings = tsne.fit_transform(np.array(all_embeddings))
+
+        
+        
+        plt.scatter(reduced_embeddings[:, 0], reduced_embeddings[:, 1], c=colors, cmap='viridis', alpha=0.6, edgecolors='w', s=50)
+        for i, txt in enumerate(all_labels):
+            plt.annotate(f"{txt}", (reduced_embeddings[i, 0], reduced_embeddings[i, 1]), fontsize=9)
+        
+        plt.title(f't-SNE plot of {self.model_name} embeddings for {len(sequences)} sequences')
+        
+        if save_path:
+            plt.savefig(save_path, dpi=72, bbox_inches='tight')
+        
+        if show:
+            plt.show()
+        
+        plt.close()
+        

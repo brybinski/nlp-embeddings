@@ -8,41 +8,48 @@ import random
 import copy
 
 
-class POS_explainer(Explainer):    
+
+class POS_explainer(Explainer):
+    """
+    Permutation feature importance biorące pod uwagę części mowy
+    Zmienia n razy token na inny o tej samej części mowy
+    i oblicza odległość do badanego osadzenia.
+    W ten sposób można ocenić wpływ danego tokena na osadzenie
+    Wykorzystuje słownik części mowy, który jest wczytywany z pliku
+    """    
     def __init__(self, model: Model, **kwargs):
         self.model = model
         self.distance = kwargs.get("distance", cosine_distance)
         path = kwargs.get("pos_dict", None)
         spaCyModel = kwargs.get("spacy", "en_core_web_trf")
         self.pos_tagger = spacy.load(spaCyModel)
-
-        self.pos_dict:dict = self.load_pos_dict(path) # dictionary with POS tags as keys and lists of words as values
-        self.n = kwargs.get("n", 100)  # number of permutations for each token
+        
+        # Dictionary with POS tags as keys and lists of words as values
+        self.pos_dict:dict = self.load_pos_dict(path) 
+        
+        # Number of permutations for each token
+        self.n = kwargs.get("n", 100)  
         
     def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> Explanation:
         tokens = self.model.tokenizer.tokenize(sentence)
         
-        # Check if the number of embeddings matches the number of tokens
         embeddings = self.model.get_embeddings(sentence)
-        
-        
-        assert len(embeddings) == len(tokens), "Weights and tokens length mismatch"
-
-        joined_tokens = self.model.reconstruct_sentence(tokens)
-        test = self.model.tokenizer.tokenize(joined_tokens)
-        assert len(test) == len(tokens), "Tokenization failed"
-
 
         # POS tag list
         pos_tags = self.tag_tokens(tokens)
         
+        # Set word_range if not provided TODO: rename to token_range
         if word_range is None:
             word_range = (0, len(tokens))
         
+        # Reconstruct the sentence from the tokens in the specified range
         analyzed_tokens = tokens[word_range[0]:word_range[1]]
         anazlyzed_sentence = self.model.reconstruct_sentence(analyzed_tokens)
+        
+        # Create an explanation object
         explanation = Explanation("POS permutation", anazlyzed_sentence, analyzed_tokens)
 
+        # Iterate over the specified range of tokens
         for word in range(word_range[0], word_range[1]):
             token = tokens[word]
             
@@ -55,6 +62,7 @@ class POS_explainer(Explainer):
         
         return explanation
     
+    # Load POS dictionary from a file
     def load_pos_dict(self, pos_dict_path):
         with open(pos_dict_path, "rb") as f:
             self.pos_dict = pickle.load(f)
@@ -62,6 +70,7 @@ class POS_explainer(Explainer):
             raise ValueError("Loaded POS dictionary is not a dictionary")
         return self.pos_dict
     
+    # Tag tokens with their POS tags
     def tag_tokens(self, tokens):
         pos_tags = []
         for token in tokens:
@@ -78,12 +87,13 @@ class POS_explainer(Explainer):
         
         return pos_tags
 
+    # Make a sentence with a change at a specific position
     def make_sentence(self, change, position, tokens):
         copy_tokens = copy.deepcopy(tokens)
         copy_tokens[position] = change
         return self.model.reconstruct_sentence(copy_tokens)
         
-        
+    # Calculate the score for a word based on its POS tag
     def get_word_score(self, word, position, pos_tag, tokens, embeddings):
         scores = {}
         for token in tokens:

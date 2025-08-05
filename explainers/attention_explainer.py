@@ -6,28 +6,15 @@ import numpy as np
 
 class BertAttentionExplainer(Explainer):
     """
-    Explains token embeddings by analyzing the multi-head attention weights 
-    across all attention layers in BERT-like models.
+    BERT specific attention explainer.
+    Uses attention weights from BERT to explain token influence.
+    Supports different aggregation methods (sum, mean, max).
     """
-    
     def __init__(self, model: Model, **kwargs):
         self.model = model
-        
-        self.include_cls_sep = kwargs.get("include_cls_sep", False)
         self.aggregation_method = kwargs.get("aggregation_method", "sum")  # Options: sum, mean, max
         
     def explainEmbeddings(self, sentence, word_idx=None, **kwargs) -> Explanation:
-        """
-        Generate explanation for token embeddings based on attention weights.
-        
-        Args:
-            sentence: Input sentence to explain
-            word_idx: Optional index of specific token to explain (None means explain all)
-            
-        Returns:
-            Explanation object with attention-based influence scores
-        """
-        # Get tokens and check if they match the model's tokenization
         tokens = self.model.tokenize(sentence)
         
         # Get attention weights from the modelrt
@@ -50,15 +37,11 @@ class BertAttentionExplainer(Explainer):
         return explanation
     
     def _get_attention_weights(self, sentence):
-        """
-        Extract attention weights from the model for the given sentence.
-        """
         # Tokenize input
         inputs = self.model.tokenizer(sentence, return_tensors="pt")
         input_ids = inputs["input_ids"].to(self.model.device)
         attention_mask = inputs["attention_mask"].to(self.model.device)
         
-        # Run model with output_attentions=True to get attention weights
         self.model.model.to(self.model.device)
         with torch.no_grad():
             outputs = self.model.model(
@@ -66,22 +49,11 @@ class BertAttentionExplainer(Explainer):
                 attention_mask=attention_mask,
                 output_attentions=True
             )
-            
-        # Get attention tensors (shape: [layers, batch, heads, seq_len, seq_len])
         attention_weights = outputs.attentions
         
         return attention_weights
     
     def _process_token_attention(self, tokens, attention_weights, explanation, token_idx):
-        """
-        Process attention weights for a specific token and add to explanation.
-        
-        Args:
-            tokens: List of tokens
-            attention_weights: Attention weights from the model
-            explanation: Explanation object to update
-            token_idx: Index of the token to explain
-        """
         # Convert attention_weights to numpy arrays for easier manipulation
         attn_arrays = [attn_layer.cpu().numpy()[0] for attn_layer in attention_weights]
         
@@ -105,15 +77,6 @@ class BertAttentionExplainer(Explainer):
             )
     
     def _aggregate_attention_weights(self, attention_arrays):
-        """
-        Aggregate attention weights across all layers and heads.
-        
-        Args:
-            attention_arrays: List of attention weight arrays per layer
-            
-        Returns:
-            Aggregated attention weights as numpy array
-        """
         # Stack all layers
         all_layers = np.stack(attention_arrays)
         

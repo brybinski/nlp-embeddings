@@ -10,17 +10,22 @@ import random
 import sys
 import tqdm
 from explainers.explanation import Explanation
-
+from typing import Callable
 class SHAP_explainer(Explainer):
+    """
+    Tworzy quasi-shapley values dla tokenów w zdaniu
+    Wykorzystuje zmodyfikowny algorytm Shapley do obliczenia wartości wpływu każdego
+    tokenu na osadzenie. Podejście na bazie subsetów
+    """
     model: Model
 
     def __init__(self, model: Model, **kwargs):
         self.model = model
-        self.distance = kwargs.get("distance", euclidean_distance)
+        self.distance: Callable = kwargs.get("distance", euclidean_distance)
 
     
     def explainEmbeddings(self, sentence, word_idx=None, max_subsets=None, **kwargs) -> Explanation:
-        tokens: list = self.model.tokenize(sentence)  # Use consistent tokenize method name
+        tokens: list = self.model.tokenize(sentence)
         original_embeddings = self.model.get_embeddings(sentence)
         
         # Create explanation object
@@ -78,10 +83,10 @@ class SHAP_explainer(Explainer):
         return explanation
 
     def get_score(self, perm, **kwargs):
-        token_list = kwargs.get("token_list")
-        target = kwargs.get("target")
-        distance = kwargs.get("distance")
-        original_embeddings = kwargs.get("original_embeddings")
+        token_list: list = kwargs.get("token_list",[])
+        target: int = kwargs.get("target", -1)
+        distance: Callable = kwargs.get("distance",  lambda: (_ for _ in ()).throw(RuntimeError("No distance function provided")))
+        original_embeddings: list = kwargs.get("original_embeddings", [])
         perm = list(perm)
 
 
@@ -101,8 +106,8 @@ class SHAP_explainer(Explainer):
         return distance_value
         
     def shap_values(self, model_foo, input_x, baseline=None, max_subsets=None, **kwargs):
-            target = kwargs.get("target")
-            token_list = kwargs.get("token_list")
+            target: int = kwargs.get("target", -1)
+            token_list: list = kwargs.get("token_list", [])
 
             n = len(input_x)
             if baseline is None:

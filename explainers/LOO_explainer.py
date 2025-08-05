@@ -6,14 +6,15 @@ from distances import euclidean_distance, cosine_distance
 from explainers.explanation import Explanation
 
 
-# Leave one feature out (LOFO) explainer
-# Usuwa jeden feature (token) na raz i oblicza odległość do badanego
-# osadzenia. porównując odległości można ocenić wpływ danego tokena na
-# osadzenie
-
 
 
 class LOO_explainer(Explainer):
+    """
+    Leave one feature out (LOFO) explainer
+    Usuwa jeden feature (token) na raz i oblicza odległość do badanego
+    osadzenia. porównując odległości można ocenić wpływ danego tokenu na
+    osadzenie
+    """
     model: Model
 
     def __init__(self, model: Model, **kwargs):
@@ -23,17 +24,17 @@ class LOO_explainer(Explainer):
     def explainEmbeddings(self, sentence, word_range=None, **kwargs) -> Explanation:
         tokens = self.model.tokenizer.tokenize(sentence)
 
+        # Get embeddings for the original sentence
         embeddings = self.model.get_embeddings(sentence)
-        assert len(embeddings) == len(tokens), "Weights and tokens length mismatch"
-        joined_tokens = self.model.reconstruct_sentence(tokens)
-        test = self.model.tokenizer.tokenize(joined_tokens)
-        assert len(test) == len(tokens), "Tokenization failed"
 
+        # Create an explanation object
         explanation = Explanation("LOO", sentence, tokens)
 
+        # If word_range is not provided, consider all tokens
         if word_range is None:
             word_range = (0, len(tokens))
-            
+        
+        # Iterate over the specified range of tokens
         for word in range(word_range[0], word_range[1]):
             target_token = tokens[word]
             
@@ -63,31 +64,3 @@ class LOO_explainer(Explainer):
                 explanation.add_one_word(target_token, word, token, num, distance)
 
         return explanation
-    
-    
-        # for word in range(word_range[0], word_range[1]):
-        #     dist[word] = [tokens[word]]
-        #     score = [0.0] * len(tokens)
-        #     for num, i in enumerate(tokens):
-        #         if num == word:
-        #             continue
-        #         modified_tokens = copy.deepcopy(tokens)
-        #         modified_tokens.pop(num)
-        #         new_word_idx = word if word < num else word - 1
-
-        #         modified_sentence = " ".join(modified_tokens)
-        #         modified_embeddings = self.model.get_embeddings(modified_sentence)
-        #         distance = self.distance(
-        #             embeddings[word], modified_embeddings[new_word_idx]
-        #         )
-        #         score[num] = distance
-
-        #     dist[word] = [
-        #         tokens[word],
-        #         {
-        #             "shapley_values": score,  # TODO: zmienić na score w obu explainerach
-        #             "explained_token": tokens[word],
-        #         },
-        #     ]
-
-        # return dist

@@ -64,51 +64,41 @@ class Explanation:
         import matplotlib.pyplot as plt
         import numpy as np
 
-        # Check if the token position exists in scores
         if token_pos not in self.scores:
             raise ValueError(f"No explanation data for token at position {token_pos}")
 
-        # Get the token and its influence scores
         token_data = self.scores[token_pos]
         token = token_data["token"]
         influences = token_data["intp"]
 
-        # Prepare data for plotting
         positions = []
         tokens = []
         scores = []
 
         for pos, data in influences.items():
-            # Skip the token with the same position
             if pos == token_pos:
                 continue
             positions.append(pos)
             tokens.append(data["token"])
             scores.append(data["score"])
 
-        # Sort by position for consistent display
         sorted_indices = np.argsort(positions)
         positions = [positions[i] for i in sorted_indices]
         tokens = [tokens[i] for i in sorted_indices]
         scores = [scores[i] for i in sorted_indices]
-
-        # Create figure and plot
         plt.figure(figsize=(12, 6))
 
         scores = np.abs(scores)
 
-        # Normalize scores to 0-1 range
-        if len(scores) > 0 and max(scores) > 0:  # Avoid division by zero
+        if len(scores) > 0 and max(scores) > 0:
             scores = scores / max(scores)
 
         bars = plt.bar(range(len(tokens)), scores)
 
-        # Find where to place the vertical line based on the token's position
         insert_index = 0
         while insert_index < len(positions) and positions[insert_index] < token_pos:
             insert_index += 1
 
-        # Add vertical line to indicate the position of the analyzed token
         plt.axvline(
             x=insert_index - 0.5,
             color="blue",
@@ -299,12 +289,75 @@ class Explanation:
 
         return plt
 
+
+    # def plot_self_comparison(
+    #     self, save_path=None, show=True, min_influence=0.05, title=None, exponential_scale=1.0
+    # ):
+    #     import numpy as np
+    #     from d3blocks import D3Blocks
+    #     import pandas as pd
+
+    #     n_tokens = len(self.tokens)
+    #     influence_matrix = np.zeros((n_tokens, n_tokens))
+
+    #     # Build an NxN matrix
+    #     for main_pos, main_data in self.scores.items():
+    #         for sub_pos, sub_data in main_data["intp"].items():
+    #             influence_matrix[main_pos, sub_pos] = abs(sub_data["score"])
+                    
+    #     # Filter out tiny values
+    #     influence_matrix[influence_matrix < min_influence] = 0
+
+    #     non_zero_mask = influence_matrix > 0
+    #     if np.any(non_zero_mask):
+    #         # Square the values to make large differences more pronounced
+    #         influence_matrix[non_zero_mask] = abs(influence_matrix[non_zero_mask]) * exponential_scale
+
+    #     # Create token:position labels to differentiate repeated tokens
+    #     token_position_labels = [f"{token}:{pos}" for pos, token in enumerate(self.tokens)]
+        
+    #     # Convert adjacency matrix to DataFrame with token:position labels
+    #     adj_df = pd.DataFrame(
+    #         influence_matrix, 
+    #         index=token_position_labels, 
+    #         columns=token_position_labels
+    #     )
+
+    #     # Create an edge list: "source", "target", "weight"
+    #     edgelist_df = adj_df.stack().reset_index()
+    #     edgelist_df.columns = ["target", "source", "weight"]
+    #     edgelist_df = edgelist_df[edgelist_df["weight"] != 0]
+        
+    #     # Remove self loops (where source == target)
+    #     edgelist_df = edgelist_df[edgelist_df["source"] != edgelist_df["target"]]
+        
+    #     print(edgelist_df)
+    #     d3 = D3Blocks()
+    #     d3.chord(
+    #         edgelist_df,
+    #         cmap="rainbow",
+    #         title=title if title else f"Token Influence Relationships - {self.explanation_type}",
+    #         filepath=save_path if save_path else None,
+    #     )
+
+    #     return d3
+    
+
     def plot_self_comparison(
         self, save_path=None, show=True, min_influence=0.05, title=None, exponential_scale=1.0
     ):
+        
+
         import numpy as np
         from d3blocks import D3Blocks
         import pandas as pd
+        import os
+        import time
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        import matplotlib.pyplot as plt
+        from svglib.svglib import svg2rlg
+        from reportlab.graphics import renderPM
 
         n_tokens = len(self.tokens)
         influence_matrix = np.zeros((n_tokens, n_tokens))
@@ -339,6 +392,12 @@ class Explanation:
         
         # Remove self loops (where source == target)
         edgelist_df = edgelist_df[edgelist_df["source"] != edgelist_df["target"]]
+
+        # Create a temporary HTML file path if save_path is not provided
+        html_path = save_path if save_path else "temp_chord_diagram.html"
+        
+        # Generate SVG path from HTML path
+        svg_path = os.path.splitext(html_path)[0] + ".svg"
         
         print(edgelist_df)
         d3 = D3Blocks()
@@ -346,7 +405,54 @@ class Explanation:
             edgelist_df,
             cmap="rainbow",
             title=title if title else f"Token Influence Relationships - {self.explanation_type}",
-            filepath=save_path if save_path else None,
+            filepath=html_path,
         )
+        
+        # Export to SVG using headless browser
+        try:
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            browser = webdriver.Chrome(options=options)
+            
+            # Load the HTML file
+            browser.get('file://' + os.path.abspath(html_path))
+            
+            # Wait for the visualization to render
+            time.sleep(2)
+            
+            # Extract the SVG content
+            svg_content = browser.execute_script("""
+                var svg = document.querySelector('svg');
+                return svg.outerHTML;
+            """)
+            
+            # Save SVG to file
+            with open(svg_path, 'w', encoding='utf-8') as f:
+                f.write(svg_content)
+                
+            browser.quit()
+            
+            print(f"SVG saved to {svg_path}")
+            
+            # Display the SVG in matplotlib if show is True
+            if show:
+                # Convert SVG to a format matplotlib can display
+                drawing = svg2rlg(svg_path)
+                if drawing is not None:
+                    img = renderPM.drawToPIL(drawing)
+                    
+                    plt.figure(figsize=(10, 10))
+                    plt.imshow(img)
+                    plt.axis('off')
+                    plt.title(f"Token Influence Relationships - {self.explanation_type}")
+                    plt.tight_layout()
+                    plt.show()
+                
+        except Exception as e:
+            print(f"Error saving/displaying SVG: {str(e)}")
+            # Fall back to showing the HTML
+            if show:
+                d3.show(filepath=html_path)
 
         return d3
