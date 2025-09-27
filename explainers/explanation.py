@@ -30,7 +30,31 @@ class Explanation:
                 self.scores[position]["intp"][sub_position]["score"] += sub_score[
                     "score"
                 ]
+    def normalize(self):
+        """
+        Normalize scores for each token's influences to the range [0, 1].
+        """
+        for main_pos, main_data in self.scores.items():
+            influences = main_data["intp"]
+            if not influences:
+                continue
+            
+            scores = [abs(data["score"]) for data in influences.values()]
+            max_score = max(scores)
+            min_score = min(scores)
 
+            # Normalize scores to [0, 1]
+            padd = 0
+            if min_score < 0:
+                padd = abs(min_score)
+            for sub_pos, data in influences.items():
+                if max_score == 0:
+                    normalized_score = 0
+                else:
+                    normalized_score =  (padd + abs(data["score"])) /  (padd + max_score)
+                influences[sub_pos]["score"] = normalized_score
+                
+        return self
     def add_one_word(
         self, main_token, main_position: int, sub_token, sub_position: int, score: float
     ):

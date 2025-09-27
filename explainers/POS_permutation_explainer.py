@@ -47,7 +47,7 @@ class POS_explainer(Explainer):
         anazlyzed_sentence = self.model.reconstruct_sentence(analyzed_tokens)
         
         # Create an explanation object
-        explanation = Explanation("POS permutation", anazlyzed_sentence, analyzed_tokens)
+        explanation = Explanation(f"POS-PFI{self.n}", anazlyzed_sentence, analyzed_tokens)
 
         # Iterate over the specified range of tokens
         for word in range(word_range[0], word_range[1]):
@@ -77,7 +77,7 @@ class POS_explainer(Explainer):
             if token.startswith("##"):
                 if  not pos_tags[-1] == ("SUBWORD"):
                     pos_tags[-1] = ("SUBWORD")
-                pos_tags.append("SUBWORD")
+                pos_tags.append("##SUBWORD")
             else:
                 try:
                     doc = self.pos_tagger(token)
@@ -99,11 +99,11 @@ class POS_explainer(Explainer):
         for token in tokens:
             scores[token] = 0.0
         
-        if pos_tag == 'SUBWORD':
+        if pos_tag == 'SUBWORD' or pos_tag == '##SUBWORD':
             return scores
         
-        if tokens[position] in ',.;':
-            return scores
+        # if tokens[position] in ',.;':
+        #     return scores
         
         for n in range(self.n):
             replacement = random.choice(self.pos_dict[pos_tag])
@@ -119,4 +119,6 @@ class POS_explainer(Explainer):
             
         return scores
             
-        
+    def explainOne(self, sentence, position, **kwargs) -> Explanation:
+        return self.explainEmbeddings(sentence, word_range=(position, position + 1), **kwargs)
+    

@@ -15,3 +15,7 @@ class Explainer(ABC):
     @abstractmethod
     def explainEmbeddings(self, sentence, **kwargs) -> Explanation:
             pass
+        
+    @abstractmethod
+    def explainOne(self, sentence, position, **kwargs) -> Explanation:
+            pass

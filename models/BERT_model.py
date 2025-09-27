@@ -3,8 +3,9 @@ import torch
 from models.model import Model
 import numpy as np
 class BERT_model(Model):
-    def __init__(self, model_name="bert-base-uncased"):
+    def __init__(self, model_name="bert-base-uncased", sep_cls = False):
         self.model_name = model_name
+        self.sep_cls = sep_cls
         self.tokenizer = BertTokenizer.from_pretrained(model_name)
         self.model = BertModel.from_pretrained(model_name)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,11 +27,16 @@ class BERT_model(Model):
         last_hidden_state = outputs.last_hidden_state[0]
 
         # Convert to list (excluding special tokens [CLS] and [SEP])
+        if self.sep_cls:
+            embeddings = last_hidden_state.cpu().tolist()
         embeddings = last_hidden_state[1:-1].cpu().tolist()
 
         return embeddings
 
     def tokenize(self, sentence) -> list:
+        if self.sep_cls:
+            token_list = self.tokenizer.tokenize(sentence)
+            return ["[CLS]"] + token_list + ["[SEP]"]
         return self.tokenizer.tokenize(sentence)
 
     def reconstruct_sentence(self, tokens) -> str:
