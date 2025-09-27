@@ -1,0 +1,3 @@
+[submodule "xaiEmbeddings"]
+	path = xaiEmbeddings
+	url = git@github.com:brybinski/xaiEmbeddings.git
