@@ -1,4 +1,9 @@
-# DEBUG repo, MAIN PACKAGE IS github.com/brybinski/xaiEmbeddings
+# DEBUG repo
+
+# main pypi repo is: [brybinski/xaiEmbeddings](https://github.com/brybinski/xaiEmbeddings.git)
+
+
+
 # XAI Embeddings
 
 A Python package for explainable AI (XAI) embeddings analysis, using perturbation based explanation methods for transformer-based models. Explanations show how tokens influence position of each other.
