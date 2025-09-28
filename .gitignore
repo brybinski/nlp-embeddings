@@ -13,7 +13,7 @@ __pycache__
 plot/
 dfs/
 .gitignore
-
+img/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -22,6 +22,7 @@ __pycache__/
 # C extensions
 *.so
 
+debug.py
 # Distribution / packaging
 .Python
 build/

@@ -1,4 +1,4 @@
-from models.BERT_model import BERT_model
+from xai_embeddings.models.BERT_model import BERT_model
 
 def main():
     tsne_model = BERT_model("bert-base-uncased")

@@ -4,11 +4,11 @@ import random
 import copy
 import os
 from tqdm import tqdm
-from explainers.POS_permutation_explainer import POS_explainer
-from explainers.subset_explainer import subset_explainer
-from models.BERT_model import BERT_model
-from explainers.LOO_explainer import LOO_explainer
-from explainers.attention_explainer import BertAttentionExplainer
+from xai_embeddings.explainers.POS_permutation_explainer import POS_explainer
+from xai_embeddings.explainers.subset_explainer import subset_explainer
+from xai_embeddings.models.BERT_model import BERT_model
+from xai_embeddings.explainers.LOO_explainer import LOO_explainer
+from xai_embeddings.explainers.attention_explainer import BertAttentionExplainer
 import spacy
 import random
 
@@ -306,7 +306,7 @@ def main():
 
     print(f"Loaded {len(samples)} samples")
     model = BERT_model("bert-base-uncased")
-    from distances import euclidean_distance
+    from xai_embeddings.distances import euclidean_distance
 
     explainers = {}
     explainers["attention"] = BertAttentionExplainer(model, silent=True)

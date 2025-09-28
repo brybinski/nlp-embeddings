@@ -8,11 +8,11 @@ import seaborn as sns
 import random
 from collections import defaultdict
 
-from explainers.POS_permutation_explainer import POS_explainer
-from explainers.LOO_explainer import LOO_explainer
-from explainers.subset_explainer import subset_explainer
-from explainers.attention_explainer import BertAttentionExplainer
-from models.BERT_model import BERT_model
+from xai_embeddings.explainers.POS_permutation_explainer import POS_explainer
+from xai_embeddings.explainers.LOO_explainer import LOO_explainer
+from xai_embeddings.explainers.subset_explainer import subset_explainer
+from xai_embeddings.explainers.attention_explainer import BertAttentionExplainer
+from xai_embeddings.models.BERT_model import BERT_model
 
 
 # Mostly LLM generated
@@ -216,7 +216,7 @@ def get_valid_token_position(model, sentence):
 if __name__ == "__main__":
     # Load model
     mod = BERT_model("bert-base-uncased")
-    from distances import euclidean_distance
+    from xai_embeddings.distances import euclidean_distance
 
     # Setup explainers
     explainers = {}
