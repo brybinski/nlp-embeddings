@@ -1,8 +1,4 @@
-# DEBUG repo
-
-# main pypi repo is: [brybinski/xaiEmbeddings](https://github.com/brybinski/xaiEmbeddings.git)
-
-
+main pypi repo is: [brybinski/xaiEmbeddings](https://github.com/brybinski/xaiEmbeddings.git)
 
 # XAI Embeddings
 
